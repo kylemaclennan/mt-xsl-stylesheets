@@ -1,70 +1,78 @@
 <?xml version="1.0" encoding="windows-1252"?>
-<xsl:stylesheet version="1.0" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n3="http://www.w3.org/1999/xhtml" xmlns:n1="urn:hl7-org:v3" xmlns:n2="urn:hl7-org:v3/meta/voc" xmlns:voc="urn:hl7-org:v3/voc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdtc="urn:hl7-org:sdtc">
-	<xsl:output method="html" indent="yes" version="4.01" encoding="ISO-8859-1" doctype-public="-//W3C//DTD HTML 4.01//EN"/>
+<xsl:stylesheet version="1.0" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n3="http://www.w3.org/1999/xhtml" xmlns:n1="urn:hl7-org:v3" xmlns:n2="urn:hl7-org:v3/meta/voc" xmlns:voc="urn:hl7-org:v3/voc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xmlns:sdtc="urn:hl7-org:sdtc">
+	<xsl:output method="html" indent="yes" version="4.01" encoding="ISO-8859-1" doctype-public="-//W3C//DTD HTML 4.01//EN" />
 
 	<!-- CDA document -->
 
 	<xsl:variable name="title">
 		<xsl:choose>
 			<xsl:when test="/n1:ClinicalDocument/n1:title">
-				<xsl:value-of select="/n1:ClinicalDocument/n1:title"/>
+				<xsl:value-of select="/n1:ClinicalDocument/n1:title" />
 			</xsl:when>
 			<xsl:otherwise>Clinical Document</xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
 
-	<xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
-	<xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
+	<xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'" />
+	<xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
 
 	<xsl:template match="/">
-		<xsl:apply-templates select="n1:ClinicalDocument"/>
+		<xsl:apply-templates select="n1:ClinicalDocument" />
 	</xsl:template>
 
 	<xsl:template match="n1:ClinicalDocument">
 		<xsl:element name="html">
 			<xsl:element name="body">
 				<xsl:element name="h2">
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
 					<xsl:element name="center">
-						<xsl:value-of select="$title"/>
+						<xsl:value-of select="$title" />
 					</xsl:element>
 				</xsl:element>
-				<xsl:element name="br"/>
+				<xsl:element name="br" />
 				<xsl:element name="center">
 					<xsl:element name="b">
 						<xsl:text>Created On:</xsl:text>
 					</xsl:element>
 					<xsl:text> </xsl:text>
 					<xsl:call-template name="formatDate">
-						<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:effectiveTime/@value"/>
+						<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:effectiveTime/@value" />
 					</xsl:call-template>
-				</xsl:element>	
+				</xsl:element>
 
-				<!-- Demographics -->	
-				<xsl:element name="p"/>				
+				<!-- Demographics -->
+				<xsl:element name="p" />
 				<xsl:element name="h3">
 					<xsl:text>Demographics</xsl:text>
 				</xsl:element>
-				<xsl:element name="br"/>
+				<xsl:element name="br" />
 				<xsl:call-template name="demographics">
-					<xsl:with-param name="patientRole" select="/n1:ClinicalDocument/n1:recordTarget/n1:patientRole"/>
+					<xsl:with-param name="patientRole" select="/n1:ClinicalDocument/n1:recordTarget/n1:patientRole" />
 				</xsl:call-template>
+
+				<!-- Encounters -->
+				<xsl:if test="/n1:ClinicalDocument/n1:component/n1:structuredBody/n1:component/n1:section/n1:code/@code='46240-8'">
+					<xsl:call-template name="encounters">
+						<xsl:with-param name="section" select="/n1:ClinicalDocument/n1:component/n1:structuredBody/n1:component/n1:section" />
+					</xsl:call-template>
+				</xsl:if>
 
 				<!-- Author -->
 				<xsl:if test="/n1:ClinicalDocument/n1:author/n1:assignedAuthor/n1:representedOrganization">
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
 					<xsl:call-template name="author">
-						<xsl:with-param name="author" select="/n1:ClinicalDocument/n1:author/n1:assignedAuthor"/>
+						<xsl:with-param name="author" select="/n1:ClinicalDocument/n1:author/n1:assignedAuthor" />
 					</xsl:call-template>
 				</xsl:if>
 
 				<!-- Participant -->
 				<xsl:if test="/n1:ClinicalDocument/n1:participant">
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
 					<xsl:element name="h3">
 						<xsl:text>Support</xsl:text>
 					</xsl:element>
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
 					<xsl:element name="table">
 						<xsl:element name="tr">
 							<xsl:element name="th">Name</xsl:element>
@@ -73,36 +81,36 @@
 							<xsl:element name="th">Address</xsl:element>
 							<xsl:element name="th">Phone</xsl:element>
 						</xsl:element>
-						<xsl:apply-templates select="/n1:ClinicalDocument/n1:participant"/>
+						<xsl:apply-templates select="/n1:ClinicalDocument/n1:participant" />
 					</xsl:element>
 				</xsl:if>
 
 				<!-- Performer -->
 				<xsl:if test="/n1:ClinicalDocument/n1:documentationOf/n1:serviceEvent/n1:performer">
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
 					<xsl:element name="h3">
 						<xsl:text>Care Team Providers</xsl:text>
 					</xsl:element>
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
 					<xsl:element name="table">
 						<xsl:element name="tr">
 							<xsl:element name="th">Care Team Member Name</xsl:element>
 							<xsl:element name="th">Role</xsl:element>
 							<xsl:element name="th">Phone</xsl:element>
 						</xsl:element>
-						<xsl:apply-templates select="/n1:ClinicalDocument/n1:documentationOf/n1:serviceEvent/n1:performer"/>
+						<xsl:apply-templates select="/n1:ClinicalDocument/n1:documentationOf/n1:serviceEvent/n1:performer" />
 					</xsl:element>
 				</xsl:if>
 
 				<!-- Encounter Participant -->
 				<xsl:if test="/n1:ClinicalDocument/n1:componentOf/n1:encompassingEncounter/n1:encounterParticipant/n1:assignedEntity">
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
 					<xsl:element name="h3">
 						<xsl:text>Provider Referred From</xsl:text>
 					</xsl:element>
-					<xsl:element name="br"/>
-					<xsl:variable name="assigned" select="/n1:ClinicalDocument/n1:componentOf/n1:encompassingEncounter/n1:encounterParticipant/n1:assignedEntity"/>
-					<xsl:element name="br"/>
+					<xsl:element name="br" />
+					<xsl:variable name="assigned" select="/n1:ClinicalDocument/n1:componentOf/n1:encompassingEncounter/n1:encounterParticipant/n1:assignedEntity" />
+					<xsl:element name="br" />
 					<xsl:element name="table">
 						<xsl:if test="$assigned/n1:assignedPerson">
 							<xsl:element name="tr">
@@ -112,10 +120,10 @@
 										<xsl:when test="$assigned/n1:assignedPerson/n1:name/@nullFlavor">
 											<xsl:text>Unavailable</xsl:text>
 										</xsl:when>
-										<xsl:when test="$assigned/n1:assignedPerson/n1:name">									   
-											<xsl:value-of select="$assigned/n1:assignedPerson/n1:name"/>
-										</xsl:when>  
-									</xsl:choose>   
+										<xsl:when test="$assigned/n1:assignedPerson/n1:name">
+											<xsl:value-of select="$assigned/n1:assignedPerson/n1:name" />
+										</xsl:when>
+									</xsl:choose>
 								</xsl:element>
 							</xsl:element>
 						</xsl:if>
@@ -128,11 +136,11 @@
 											<xsl:text>Unavailable</xsl:text>
 										</xsl:when>
 										<xsl:when test="$assigned/n1:addr">
-											<xsl:call-template name="getAddress"> 
-												<xsl:with-param name="addr" select="$assigned/n1:addr"/>
+											<xsl:call-template name="getAddress">
+												<xsl:with-param name="addr" select="$assigned/n1:addr" />
 											</xsl:call-template>
 										</xsl:when>
-									</xsl:choose>									   
+									</xsl:choose>
 								</xsl:element>
 							</xsl:element>
 						</xsl:if>
@@ -143,8 +151,8 @@
 										<xsl:element name="tr">
 											<xsl:element name="th">Phone</xsl:element>
 											<xsl:element name="td">
-												<xsl:call-template name="getTelecom"> 
-													<xsl:with-param name="telecom" select="self::node()[@value]"/>
+												<xsl:call-template name="getTelecom">
+													<xsl:with-param name="telecom" select="self::node()[@value]" />
 												</xsl:call-template>
 											</xsl:element>
 										</xsl:element>
@@ -153,51 +161,51 @@
 										<xsl:element name="tr">
 											<xsl:element name="th">Email Address</xsl:element>
 											<xsl:element name="td">
-												<xsl:call-template name="getEmail"> 
-													<xsl:with-param name="email" select="self::node()[@value]"/>
+												<xsl:call-template name="getEmail">
+													<xsl:with-param name="email" select="self::node()[@value]" />
 												</xsl:call-template>
 											</xsl:element>
 										</xsl:element>
 									</xsl:otherwise>
-								</xsl:choose>	
-							</xsl:for-each>	
+								</xsl:choose>
+							</xsl:for-each>
 						</xsl:if>
 					</xsl:element>
 				</xsl:if>
 
-				<xsl:apply-templates select="n1:component/n1:structuredBody"/> 
+				<xsl:apply-templates select="n1:component/n1:structuredBody" />
 			</xsl:element>
 		</xsl:element>
 	</xsl:template>
 
 	<!-- Demographics -->
 	<xsl:template name="demographics">
-		<xsl:param name="patientRole"/>
+		<xsl:param name="patientRole" />
 		<xsl:element name="table">
 			<xsl:element name="tr">
 				<xsl:element name="th">Patient Name</xsl:element>
 				<xsl:element name="td">
 					<xsl:call-template name="getName">
-						<xsl:with-param name="name" select="$patientRole/n1:patient/n1:name"/>
+						<xsl:with-param name="name" select="$patientRole/n1:patient/n1:name" />
 					</xsl:call-template>
 				</xsl:element>
 			</xsl:element>
 			<xsl:if test="$patientRole/n1:addr">
 				<xsl:element name="tr">
-					<xsl:element name="th">Address</xsl:element>			
+					<xsl:element name="th">Address</xsl:element>
 					<xsl:element name="td">
-						<xsl:call-template name="getAddress"> 
-							<xsl:with-param name="addr" select="$patientRole/n1:addr[1]"/>
+						<xsl:call-template name="getAddress">
+							<xsl:with-param name="addr" select="$patientRole/n1:addr[1]" />
 						</xsl:call-template>
 					</xsl:element>
 				</xsl:element>
 			</xsl:if>
 			<xsl:if test="$patientRole/n1:addr[2]">
 				<xsl:element name="tr">
-					<xsl:element name="th">Previous Address</xsl:element>			
+					<xsl:element name="th">Previous Address</xsl:element>
 					<xsl:element name="td">
-						<xsl:call-template name="getPreviousAddress"> 
-							<xsl:with-param name="addr" select="$patientRole/n1:addr[2]"/>
+						<xsl:call-template name="getPreviousAddress">
+							<xsl:with-param name="addr" select="$patientRole/n1:addr[2]" />
 						</xsl:call-template>
 					</xsl:element>
 				</xsl:element>
@@ -206,46 +214,46 @@
 				<xsl:choose>
 					<xsl:when test="self::node()[@nullFlavor='UNK']">
 						<xsl:element name="tr">
-							<xsl:element name="th">Phone</xsl:element>			
+							<xsl:element name="th">Phone</xsl:element>
 							<xsl:element name="td">Unknown</xsl:element>
 						</xsl:element>
 					</xsl:when>
 					<xsl:when test="self::node()[@use='HP']">
 						<xsl:element name="tr">
-							<xsl:element name="th">Home Phone</xsl:element>			
+							<xsl:element name="th">Home Phone</xsl:element>
 							<xsl:element name="td">
-								<xsl:call-template name="getTelecom"> 
-									<xsl:with-param name="telecom" select="self::node()[@value]"/>
+								<xsl:call-template name="getTelecom">
+									<xsl:with-param name="telecom" select="self::node()[@value]" />
 								</xsl:call-template>
 							</xsl:element>
 						</xsl:element>
 					</xsl:when>
 					<xsl:when test="self::node()[@use='WP']">
 						<xsl:element name="tr">
-							<xsl:element name="th">Work Phone</xsl:element>			
+							<xsl:element name="th">Work Phone</xsl:element>
 							<xsl:element name="td">
-								<xsl:call-template name="getTelecom"> 
-									<xsl:with-param name="telecom" select="self::node()[@value]"/>
+								<xsl:call-template name="getTelecom">
+									<xsl:with-param name="telecom" select="self::node()[@value]" />
 								</xsl:call-template>
 							</xsl:element>
 						</xsl:element>
 					</xsl:when>
 					<xsl:otherwise>
 						<xsl:element name="tr">
-							<xsl:element name="th">Email Address</xsl:element>			
+							<xsl:element name="th">Email Address</xsl:element>
 							<xsl:element name="td">
-								<xsl:call-template name="getEmail"> 
-									<xsl:with-param name="email" select="self::node()[@value]"/>
+								<xsl:call-template name="getEmail">
+									<xsl:with-param name="email" select="self::node()[@value]" />
 								</xsl:call-template>
 							</xsl:element>
-						</xsl:element>					
+						</xsl:element>
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:for-each>
 			<xsl:element name="tr">
 				<xsl:element name="th">Sex</xsl:element>
 				<xsl:element name="td">
-					<xsl:variable name="sex" select="/n1:ClinicalDocument/n1:recordTarget/n1:patientRole/n1:patient/n1:administrativeGenderCode/@code"/>
+					<xsl:variable name="sex" select="/n1:ClinicalDocument/n1:recordTarget/n1:patientRole/n1:patient/n1:administrativeGenderCode/@code" />
 					<xsl:choose>
 						<xsl:when test="$sex='M'">Male</xsl:when>
 						<xsl:when test="$sex='F'">Female</xsl:when>
@@ -257,7 +265,7 @@
 				<xsl:element name="th">Birthdate</xsl:element>
 				<xsl:element name="td">
 					<xsl:call-template name="formatDate">
-						<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:recordTarget/n1:patientRole/n1:patient/n1:birthTime/@value"/>
+						<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:recordTarget/n1:patientRole/n1:patient/n1:birthTime/@value" />
 					</xsl:call-template>
 				</xsl:element>
 			</xsl:element>
@@ -265,7 +273,7 @@
 				<xsl:element name="th">Marital Status</xsl:element>
 				<xsl:element name="td">
 					<xsl:call-template name="getMaritalStatus">
-						<xsl:with-param name="maritalStatus" select="$patientRole/n1:patient/n1:maritalStatusCode"/>
+						<xsl:with-param name="maritalStatus" select="$patientRole/n1:patient/n1:maritalStatusCode" />
 					</xsl:call-template>
 				</xsl:element>
 			</xsl:element>
@@ -273,7 +281,7 @@
 				<xsl:element name="th">Religious Affiliation</xsl:element>
 				<xsl:element name="td">
 					<xsl:call-template name="getReligion">
-						<xsl:with-param name="religion" select="$patientRole/n1:patient/n1:religiousAffiliationCode"/>
+						<xsl:with-param name="religion" select="$patientRole/n1:patient/n1:religiousAffiliationCode" />
 					</xsl:call-template>
 				</xsl:element>
 			</xsl:element>
@@ -281,7 +289,7 @@
 				<xsl:element name="th">Race</xsl:element>
 				<xsl:element name="td">
 					<xsl:call-template name="getRaceCode">
-						<xsl:with-param name="raceCode" select="$patientRole/n1:patient/n1:raceCode"/>
+						<xsl:with-param name="raceCode" select="$patientRole/n1:patient/n1:raceCode" />
 					</xsl:call-template>
 				</xsl:element>
 			</xsl:element>
@@ -291,10 +299,10 @@
 					<xsl:element name="td">
 						<xsl:for-each select="$patientRole/n1:patient/sdtc:raceCode">
 							<xsl:call-template name="getRaceCode">
-								<xsl:with-param name="raceCode" select="."/>
+								<xsl:with-param name="raceCode" select="." />
 							</xsl:call-template>
 							<xsl:if test="position()!=last()">
-								<xsl:element name="br"/>
+								<xsl:element name="br" />
 							</xsl:if>
 						</xsl:for-each>
 					</xsl:element>
@@ -304,7 +312,7 @@
 				<xsl:element name="th">Ethnic Group</xsl:element>
 				<xsl:element name="td">
 					<xsl:call-template name="getEthnicGroup">
-						<xsl:with-param name="ethnicGroup" select="$patientRole/n1:patient/n1:ethnicGroupCode"/>
+						<xsl:with-param name="ethnicGroup" select="$patientRole/n1:patient/n1:ethnicGroupCode" />
 					</xsl:call-template>
 				</xsl:element>
 			</xsl:element>
@@ -313,7 +321,7 @@
 					<xsl:element name="th">Birth Place</xsl:element>
 					<xsl:element name="td">
 						<xsl:call-template name="getBirthPlace">
-							<xsl:with-param name="birthplace" select="$patientRole/n1:patient/n1:birthplace"/>
+							<xsl:with-param name="birthplace" select="$patientRole/n1:patient/n1:birthplace" />
 						</xsl:call-template>
 					</xsl:element>
 				</xsl:element>
@@ -322,26 +330,35 @@
 				<xsl:element name="th">Preferred Language</xsl:element>
 				<xsl:element name="td">
 					<xsl:call-template name="getLang">
-						<xsl:with-param name="lang" select="$patientRole/n1:patient/n1:languageCommunication/n1:languageCode"/>
+						<xsl:with-param name="lang" select="$patientRole/n1:patient/n1:languageCommunication/n1:languageCode" />
 					</xsl:call-template>
 				</xsl:element>
 			</xsl:element>
 		</xsl:element>
 	</xsl:template>
 
+	<!-- Encounters -->
+	<xsl:template name="encounters">
+		<xsl:param name="section" />
+		<xsl:if test="$section/n1:code/@code='46240-8'">
+			<xsl:apply-templates select="$section/n1:title[../n1:code/@code='46240-8']" />
+			<xsl:apply-templates select="$section/n1:text[../n1:code/@code='46240-8']" />
+		</xsl:if>
+	</xsl:template>
+
 	<!-- Author -->
 	<xsl:template name="author">
-		<xsl:param name="author"/>
+		<xsl:param name="author" />
 		<xsl:element name="h3">
 			<xsl:text>Author</xsl:text>
 		</xsl:element>
-		<xsl:element name="br"/>
+		<xsl:element name="br" />
 		<xsl:element name="table">
 			<xsl:if test="$author/n1:representedOrganization">
 				<xsl:element name="tr">
 					<xsl:element name="th">Organization</xsl:element>
 					<xsl:element name="td">
-						<xsl:value-of select="$author/n1:representedOrganization/n1:name"/>
+						<xsl:value-of select="$author/n1:representedOrganization/n1:name" />
 					</xsl:element>
 				</xsl:element>
 			</xsl:if>
@@ -349,8 +366,8 @@
 				<xsl:element name="tr">
 					<xsl:element name="th">Address</xsl:element>
 					<xsl:element name="td">
-						<xsl:call-template name="getAddress"> 
-							<xsl:with-param name="addr" select="$author/n1:representedOrganization/n1:addr"/>
+						<xsl:call-template name="getAddress">
+							<xsl:with-param name="addr" select="$author/n1:representedOrganization/n1:addr" />
 						</xsl:call-template>
 					</xsl:element>
 				</xsl:element>
@@ -359,8 +376,8 @@
 				<xsl:element name="tr">
 					<xsl:element name="th">Phone</xsl:element>
 					<xsl:element name="td">
-						<xsl:call-template name="getTelecom"> 
-							<xsl:with-param name="telecom" select="$author/n1:representedOrganization/n1:telecom"/>
+						<xsl:call-template name="getTelecom">
+							<xsl:with-param name="telecom" select="$author/n1:representedOrganization/n1:telecom" />
 						</xsl:call-template>
 					</xsl:element>
 				</xsl:element>
@@ -375,7 +392,7 @@
 				<xsl:choose>
 					<xsl:when test="n1:associatedEntity/n1:associatedPerson/n1:name">
 						<xsl:call-template name="getName">
-							<xsl:with-param name="name" select="n1:associatedEntity/n1:associatedPerson/n1:name"/>
+							<xsl:with-param name="name" select="n1:associatedEntity/n1:associatedPerson/n1:name" />
 						</xsl:call-template>
 					</xsl:when>
 					<xsl:otherwise>
@@ -389,15 +406,15 @@
 						<xsl:text>Unavailable</xsl:text>
 					</xsl:when>
 					<xsl:when test="n1:associatedEntity/n1:code/@displayName">
-						<xsl:value-of select="n1:associatedEntity/n1:code/@displayName"/>
+						<xsl:value-of select="n1:associatedEntity/n1:code/@displayName" />
 					</xsl:when>
 					<xsl:otherwise>
 						<xsl:text>Unavailable</xsl:text>
 					</xsl:otherwise>
-				</xsl:choose>			   
+				</xsl:choose>
 			</xsl:element>
 			<xsl:element name="td">
-				<xsl:apply-templates select="n1:associatedEntity/@classCode"/>
+				<xsl:apply-templates select="n1:associatedEntity/@classCode" />
 			</xsl:element>
 			<xsl:element name="td">
 				<xsl:choose>
@@ -406,7 +423,7 @@
 					</xsl:when>
 					<xsl:when test="n1:associatedEntity/n1:addr">
 						<xsl:call-template name="getAddress">
-							<xsl:with-param name="addr" select="n1:associatedEntity/n1:addr"/>
+							<xsl:with-param name="addr" select="n1:associatedEntity/n1:addr" />
 						</xsl:call-template>
 					</xsl:when>
 					<xsl:otherwise>
@@ -419,10 +436,10 @@
 					<xsl:when test="n1:associatedEntity/n1:telecom[1]/@use">
 						<xsl:choose>
 							<xsl:when test="contains(n1:associatedEntity/n1:telecom[1]/@value,':')">
-								<xsl:value-of select="substring-after(n1:associatedEntity/n1:telecom[1]/@value,':')"/>
+								<xsl:value-of select="substring-after(n1:associatedEntity/n1:telecom[1]/@value,':')" />
 							</xsl:when>
 							<xsl:when test="n1:associatedEntity/n1:telecom[1]/@value">
-								<xsl:value-of select="n1:associatedEntity/n1:telecom[1]/@value"/>
+								<xsl:value-of select="n1:associatedEntity/n1:telecom[1]/@value" />
 							</xsl:when>
 							<xsl:otherwise>
 								<xsl:text>Unavailable</xsl:text>
@@ -444,7 +461,7 @@
 				<xsl:choose>
 					<xsl:when test="n1:assignedEntity/n1:assignedPerson/n1:name">
 						<xsl:call-template name="getName">
-							<xsl:with-param name="name" select="n1:assignedEntity/n1:assignedPerson/n1:name"/>
+							<xsl:with-param name="name" select="n1:assignedEntity/n1:assignedPerson/n1:name" />
 						</xsl:call-template>
 					</xsl:when>
 					<xsl:otherwise>
@@ -455,11 +472,11 @@
 			<xsl:element name="td">
 				<xsl:choose>
 					<xsl:when test="n1:functionCode/@code">
-						<xsl:apply-templates select="n1:functionCode"/>
+						<xsl:apply-templates select="n1:functionCode" />
 					</xsl:when>
 					<xsl:when test="n1:functionCode/@displayName">
-						<xsl:call-template name="mixedCase"> 
-							<xsl:with-param name="toconvert" select="n1:functionCode/@displayName"/>
+						<xsl:call-template name="mixedCase">
+							<xsl:with-param name="toconvert" select="n1:functionCode/@displayName" />
 						</xsl:call-template>
 					</xsl:when>
 					<xsl:otherwise>
@@ -472,10 +489,10 @@
 					<xsl:when test="n1:assignedEntity/n1:telecom[1]/@use">
 						<xsl:choose>
 							<xsl:when test="contains(n1:assignedEntity/n1:telecom[1]/@value,':')">
-								<xsl:value-of select="substring-after(n1:assignedEntity/n1:telecom[1]/@value,':')"/>
+								<xsl:value-of select="substring-after(n1:assignedEntity/n1:telecom[1]/@value,':')" />
 							</xsl:when>
 							<xsl:when test="n1:assignedEntity/n1:telecom[1]/@value">
-								<xsl:value-of select="n1:assignedEntity/n1:telecom[1]/@value"/>
+								<xsl:value-of select="n1:assignedEntity/n1:telecom[1]/@value" />
 							</xsl:when>
 							<xsl:otherwise>
 								<xsl:text>Unavailable</xsl:text>
@@ -492,26 +509,28 @@
 
 	<!-- StructuredBody -->
 	<xsl:template match="n1:component/n1:structuredBody">
-		<xsl:apply-templates select="n1:component/n1:section"/>
+		<xsl:apply-templates select="n1:component/n1:section" />
 	</xsl:template>
 
 	<!-- Component/Section -->
 	<xsl:template match="n1:component/n1:section">
-		<xsl:apply-templates select="n1:title"/>
-		<xsl:apply-templates select="n1:text"/>
-		<xsl:apply-templates select="n1:component/n1:section"/>
+		<xsl:if test="n1:code[not(@code='46240-8')]">
+			<xsl:apply-templates select="n1:title" />
+			<xsl:apply-templates select="n1:text" />
+			<xsl:apply-templates select="n1:component/n1:section" />
+		</xsl:if>
 	</xsl:template>
 
 	<!-- Filter Blank Component/Section -->
-	<xsl:template match="n1:component/n1:section[@nullFlavor='NI']"/>
+	<xsl:template match="n1:component/n1:section[@nullFlavor='NI']" />
 
 	<!--   Title  -->
 	<xsl:template match="n1:title">
-		<xsl:element name="br"/>
+		<xsl:element name="br" />
 		<xsl:element name="h3">
-			<xsl:call-template name="mixedCase"> 
+			<xsl:call-template name="mixedCase">
 				<xsl:with-param name="toconvert">
-					<xsl:value-of select="."/>
+					<xsl:value-of select="." />
 				</xsl:with-param>
 			</xsl:call-template>
 		</xsl:element>
@@ -520,7 +539,7 @@
 	<!--   Text   -->
 	<xsl:template match="n1:text">
 		<xsl:if test="text()">
-			<xsl:element name="br"/>
+			<xsl:element name="br" />
 		</xsl:if>
 		<xsl:apply-templates/>
 	</xsl:template>
@@ -534,7 +553,7 @@
 
 	<!--   break   -->
 	<xsl:template match="n1:br">
-		<xsl:element name="br"/>
+		<xsl:element name="br" />
 	</xsl:template>
 
 	<!--   content  -->
@@ -570,7 +589,7 @@
 ****************************************************************************************************************************-->
 
 	<xsl:template match="n1:table">
-		<xsl:element name="br"/>
+		<xsl:element name="br" />
 		<xsl:element name="table">
 			<xsl:apply-templates/>
 		</xsl:element>
@@ -596,15 +615,15 @@
 
 	<xsl:template match="n1:th">
 		<xsl:element name="th">
-			<xsl:copy-of select="@*[name()='colspan']"/>
-			<xsl:value-of select="normalize-space()"/>
+			<xsl:copy-of select="@*[name()='colspan']" />
+			<xsl:value-of select="normalize-space()" />
 		</xsl:element>
 	</xsl:template>
 
 	<xsl:template match="n1:td">
 		<xsl:element name="td">
-			<xsl:copy-of select="@*[name()='colspan']"/>
-			<xsl:value-of select="normalize-space(.)"/>
+			<xsl:copy-of select="@*[name()='colspan']" />
+			<xsl:value-of select="normalize-space(.)" />
 		</xsl:element>
 	</xsl:template>
 
@@ -615,17 +634,17 @@
 	<xsl:template match="n1:linkHtml">
 		<xsl:element name="a">
 			<xsl:attribute name="href">
-				<xsl:value-of select="./@href"/>
+				<xsl:value-of select="./@href" />
 			</xsl:attribute>
 			<xsl:attribute name="target">
 				<xsl:text>_blank</xsl:text>
 			</xsl:attribute>
 			<xsl:choose>
 				<xsl:when test=".!=''">
-					<xsl:value-of select="."/>
+					<xsl:value-of select="." />
 				</xsl:when>
 				<xsl:otherwise>
-					<xsl:value-of select="./@href"/>
+					<xsl:value-of select="./@href" />
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:element>
@@ -637,7 +656,7 @@
 
 	<!-- 	Support Relationship   -->
 	<xsl:template match="n1:associatedEntity/@classCode">
-		<xsl:variable name="participant" select="."/>
+		<xsl:variable name="participant" select="." />
 		<xsl:choose>
 			<xsl:when test="$participant='CAREGIVER'">
 				<xsl:text>Caregiver</xsl:text>
@@ -658,14 +677,14 @@
 				<xsl:text>Emergency Contact</xsl:text>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="$participant"/>
+				<xsl:value-of select="$participant" />
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
 	<!-- 	Care Team Member Function   -->
 	<xsl:template match="n1:functionCode">
-		<xsl:variable name="performerFunc" select="./@code"/>
+		<xsl:variable name="performerFunc" select="./@code" />
 		<xsl:choose>
 			<xsl:when test="$performerFunc='PCP'">
 				<xsl:text>primary care physician</xsl:text>
@@ -710,8 +729,8 @@
 				<xsl:text>third assistant</xsl:text>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:call-template name="mixedCase"> 
-					<xsl:with-param name="toconvert" select="./@displayName"/>
+				<xsl:call-template name="mixedCase">
+					<xsl:with-param name="toconvert" select="./@displayName" />
 				</xsl:call-template>
 			</xsl:otherwise>
 		</xsl:choose>
@@ -719,7 +738,7 @@
 
 	<!-- Set Marital Status -->
 	<xsl:template name="getMaritalStatus">
-		<xsl:param name="maritalStatus"/>
+		<xsl:param name="maritalStatus" />
 		<xsl:choose>
 			<xsl:when test="$maritalStatus/@code='A'">
 				<xsl:text>Anulled</xsl:text>
@@ -749,7 +768,7 @@
 				<xsl:text>Widowed</xsl:text>
 			</xsl:when>
 			<xsl:when test="$maritalStatus/@displayName">
-				<xsl:value-of select="$maritalStatus/@displayName"/>
+				<xsl:value-of select="$maritalStatus/@displayName" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:text>Unknown</xsl:text>
@@ -759,232 +778,232 @@
 
 	<!-- Set Religion -->
 	<xsl:template name="getReligion">
-		<xsl:param name="religion"/>
+		<xsl:param name="religion" />
 		<xsl:choose>
-			<xsl:when test="$religion/@code='1008'"> 
-				<xsl:text>Babi &amp; Baha&apos;I faiths</xsl:text> 
+			<xsl:when test="$religion/@code='1008'">
+				<xsl:text>Babi &amp; Baha&apos;I faiths</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1009'"> 
-				<xsl:text>Baptist</xsl:text> 
+			<xsl:when test="$religion/@code='1009'">
+				<xsl:text>Baptist</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1010'"> 
-				<xsl:text>Bon</xsl:text> 
+			<xsl:when test="$religion/@code='1010'">
+				<xsl:text>Bon</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1011'"> 
-				<xsl:text>Cao Dai</xsl:text> 
+			<xsl:when test="$religion/@code='1011'">
+				<xsl:text>Cao Dai</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1012'"> 
-				<xsl:text>Celticism</xsl:text> 
+			<xsl:when test="$religion/@code='1012'">
+				<xsl:text>Celticism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1013'"> 
-				<xsl:text>Christian (non-Catholic, non-specific)</xsl:text> 
+			<xsl:when test="$religion/@code='1013'">
+				<xsl:text>Christian (non-Catholic, non-specific)</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1014'"> 
-				<xsl:text>Confucianism</xsl:text> 
+			<xsl:when test="$religion/@code='1014'">
+				<xsl:text>Confucianism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1015'"> 
-				<xsl:text>Cyberculture Religions</xsl:text> 
+			<xsl:when test="$religion/@code='1015'">
+				<xsl:text>Cyberculture Religions</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1016'"> 
-				<xsl:text>Divination</xsl:text> 
+			<xsl:when test="$religion/@code='1016'">
+				<xsl:text>Divination</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1017'"> 
-				<xsl:text>Fourth Way</xsl:text> 
+			<xsl:when test="$religion/@code='1017'">
+				<xsl:text>Fourth Way</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1018'"> 
-				<xsl:text>Free Daism</xsl:text> 
+			<xsl:when test="$religion/@code='1018'">
+				<xsl:text>Free Daism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1019'"> 
-				<xsl:text>Gnosis</xsl:text> 
+			<xsl:when test="$religion/@code='1019'">
+				<xsl:text>Gnosis</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1020'"> 
-				<xsl:text>Hinduism</xsl:text> 
+			<xsl:when test="$religion/@code='1020'">
+				<xsl:text>Hinduism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1021'"> 
-				<xsl:text>Humanism</xsl:text> 
+			<xsl:when test="$religion/@code='1021'">
+				<xsl:text>Humanism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1022'"> 
-				<xsl:text>Independent</xsl:text> 
+			<xsl:when test="$religion/@code='1022'">
+				<xsl:text>Independent</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1023'"> 
-				<xsl:text>Islam</xsl:text> 
+			<xsl:when test="$religion/@code='1023'">
+				<xsl:text>Islam</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1024'"> 
-				<xsl:text>Jainism</xsl:text> 
+			<xsl:when test="$religion/@code='1024'">
+				<xsl:text>Jainism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1025'"> 
-				<xsl:text>Jehovah&apos;s Witnesses</xsl:text> 
+			<xsl:when test="$religion/@code='1025'">
+				<xsl:text>Jehovah&apos;s Witnesses</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1026'"> 
-				<xsl:text>Judaism</xsl:text> 
+			<xsl:when test="$religion/@code='1026'">
+				<xsl:text>Judaism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1027'"> 
-				<xsl:text>Latter Day Saints</xsl:text> 
+			<xsl:when test="$religion/@code='1027'">
+				<xsl:text>Latter Day Saints</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1028'"> 
-				<xsl:text>Lutheran</xsl:text> 
+			<xsl:when test="$religion/@code='1028'">
+				<xsl:text>Lutheran</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1029'"> 
-				<xsl:text>Mahayana</xsl:text> 
+			<xsl:when test="$religion/@code='1029'">
+				<xsl:text>Mahayana</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1030'"> 
-				<xsl:text>Meditation</xsl:text> 
+			<xsl:when test="$religion/@code='1030'">
+				<xsl:text>Meditation</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1031'"> 
-				<xsl:text>Messianic Judaism</xsl:text> 
+			<xsl:when test="$religion/@code='1031'">
+				<xsl:text>Messianic Judaism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1032'"> 
-				<xsl:text>Mitraism</xsl:text> 
+			<xsl:when test="$religion/@code='1032'">
+				<xsl:text>Mitraism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1033'"> 
-				<xsl:text>New Age</xsl:text> 
+			<xsl:when test="$religion/@code='1033'">
+				<xsl:text>New Age</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1034'"> 
-				<xsl:text>non-Roman Catholic</xsl:text> 
+			<xsl:when test="$religion/@code='1034'">
+				<xsl:text>non-Roman Catholic</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1035'"> 
-				<xsl:text>Occult</xsl:text> 
+			<xsl:when test="$religion/@code='1035'">
+				<xsl:text>Occult</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1036'"> 
-				<xsl:text>Orthodox</xsl:text> 
+			<xsl:when test="$religion/@code='1036'">
+				<xsl:text>Orthodox</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1037'"> 
-				<xsl:text>Paganism</xsl:text> 
+			<xsl:when test="$religion/@code='1037'">
+				<xsl:text>Paganism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1038'"> 
-				<xsl:text>Pentecostal</xsl:text> 
+			<xsl:when test="$religion/@code='1038'">
+				<xsl:text>Pentecostal</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1039'"> 
-				<xsl:text>Process, The</xsl:text> 
+			<xsl:when test="$religion/@code='1039'">
+				<xsl:text>Process, The</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1040'"> 
-				<xsl:text>Reformed/Presbyterian</xsl:text> 
+			<xsl:when test="$religion/@code='1040'">
+				<xsl:text>Reformed/Presbyterian</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1041'"> 
-				<xsl:text>Roman Catholic Church</xsl:text> 
+			<xsl:when test="$religion/@code='1041'">
+				<xsl:text>Roman Catholic Church</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1042'"> 
-				<xsl:text>Satanism</xsl:text> 
+			<xsl:when test="$religion/@code='1042'">
+				<xsl:text>Satanism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1043'"> 
-				<xsl:text>Scientology</xsl:text> 
+			<xsl:when test="$religion/@code='1043'">
+				<xsl:text>Scientology</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1044'"> 
-				<xsl:text>Shamanism</xsl:text> 
+			<xsl:when test="$religion/@code='1044'">
+				<xsl:text>Shamanism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1045'"> 
-				<xsl:text>Shiite (Islam)</xsl:text> 
+			<xsl:when test="$religion/@code='1045'">
+				<xsl:text>Shiite (Islam)</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1046'"> 
-				<xsl:text>Shinto</xsl:text> 
+			<xsl:when test="$religion/@code='1046'">
+				<xsl:text>Shinto</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1047'"> 
-				<xsl:text>Sikism</xsl:text> 
+			<xsl:when test="$religion/@code='1047'">
+				<xsl:text>Sikism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1048'"> 
-				<xsl:text>Spiritualism</xsl:text> 
+			<xsl:when test="$religion/@code='1048'">
+				<xsl:text>Spiritualism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1049'"> 
-				<xsl:text>Sunni (Islam)</xsl:text> 
+			<xsl:when test="$religion/@code='1049'">
+				<xsl:text>Sunni (Islam)</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1050'"> 
-				<xsl:text>Taoism</xsl:text> 
+			<xsl:when test="$religion/@code='1050'">
+				<xsl:text>Taoism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1051'"> 
-				<xsl:text>Theravada</xsl:text> 
+			<xsl:when test="$religion/@code='1051'">
+				<xsl:text>Theravada</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1052'"> 
-				<xsl:text>Unitarian-Universalism</xsl:text> 
+			<xsl:when test="$religion/@code='1052'">
+				<xsl:text>Unitarian-Universalism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1053'"> 
-				<xsl:text>Universal Life Church</xsl:text> 
+			<xsl:when test="$religion/@code='1053'">
+				<xsl:text>Universal Life Church</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1054'"> 
-				<xsl:text>Vajrayana (Tibetan)</xsl:text> 
+			<xsl:when test="$religion/@code='1054'">
+				<xsl:text>Vajrayana (Tibetan)</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1055'"> 
-				<xsl:text>Veda</xsl:text> 
+			<xsl:when test="$religion/@code='1055'">
+				<xsl:text>Veda</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1056'"> 
-				<xsl:text>Voodoo</xsl:text> 
+			<xsl:when test="$religion/@code='1056'">
+				<xsl:text>Voodoo</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1057'"> 
-				<xsl:text>Wicca</xsl:text> 
+			<xsl:when test="$religion/@code='1057'">
+				<xsl:text>Wicca</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1058'"> 
-				<xsl:text>Yaohushua</xsl:text> 
+			<xsl:when test="$religion/@code='1058'">
+				<xsl:text>Yaohushua</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1059'"> 
-				<xsl:text>Zen Buddhism</xsl:text> 
+			<xsl:when test="$religion/@code='1059'">
+				<xsl:text>Zen Buddhism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1060'"> 
-				<xsl:text>Zoroastrianism</xsl:text> 
+			<xsl:when test="$religion/@code='1060'">
+				<xsl:text>Zoroastrianism</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1062'"> 
-				<xsl:text>Brethren</xsl:text> 
+			<xsl:when test="$religion/@code='1062'">
+				<xsl:text>Brethren</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1063'"> 
-				<xsl:text>Christian Scientist</xsl:text> 
+			<xsl:when test="$religion/@code='1063'">
+				<xsl:text>Christian Scientist</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1064'"> 
-				<xsl:text>Church of Christ</xsl:text> 
+			<xsl:when test="$religion/@code='1064'">
+				<xsl:text>Church of Christ</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1065'"> 
-				<xsl:text>Church of God</xsl:text> 
+			<xsl:when test="$religion/@code='1065'">
+				<xsl:text>Church of God</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1066'"> 
-				<xsl:text>Congregational</xsl:text> 
+			<xsl:when test="$religion/@code='1066'">
+				<xsl:text>Congregational</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1067'"> 
-				<xsl:text>Disciples of Christ</xsl:text> 
+			<xsl:when test="$religion/@code='1067'">
+				<xsl:text>Disciples of Christ</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1068'"> 
-				<xsl:text>Eastern Orthodox</xsl:text> 
+			<xsl:when test="$religion/@code='1068'">
+				<xsl:text>Eastern Orthodox</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1069'"> 
-				<xsl:text>Episcopalian</xsl:text> 
+			<xsl:when test="$religion/@code='1069'">
+				<xsl:text>Episcopalian</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1070'"> 
-				<xsl:text>Evangelical Covenant</xsl:text> 
+			<xsl:when test="$religion/@code='1070'">
+				<xsl:text>Evangelical Covenant</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1071'"> 
-				<xsl:text>Friends</xsl:text> 
+			<xsl:when test="$religion/@code='1071'">
+				<xsl:text>Friends</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1072'"> 
-				<xsl:text>Full Gospel</xsl:text> 
+			<xsl:when test="$religion/@code='1072'">
+				<xsl:text>Full Gospel</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1073'"> 
-				<xsl:text>Methodist</xsl:text> 
+			<xsl:when test="$religion/@code='1073'">
+				<xsl:text>Methodist</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1074'"> 
-				<xsl:text>Native American</xsl:text> 
+			<xsl:when test="$religion/@code='1074'">
+				<xsl:text>Native American</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1075'"> 
-				<xsl:text>Nazarene</xsl:text> 
+			<xsl:when test="$religion/@code='1075'">
+				<xsl:text>Nazarene</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1076'"> 
-				<xsl:text>Presbyterian</xsl:text> 
+			<xsl:when test="$religion/@code='1076'">
+				<xsl:text>Presbyterian</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1077'"> 
-				<xsl:text>Protestant</xsl:text> 
+			<xsl:when test="$religion/@code='1077'">
+				<xsl:text>Protestant</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1078'"> 
-				<xsl:text>Protestant, No Denomination</xsl:text> 
+			<xsl:when test="$religion/@code='1078'">
+				<xsl:text>Protestant, No Denomination</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1079'"> 
-				<xsl:text>Reformed</xsl:text> 
+			<xsl:when test="$religion/@code='1079'">
+				<xsl:text>Reformed</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1080'"> 
-				<xsl:text>Salvation Army</xsl:text> 
+			<xsl:when test="$religion/@code='1080'">
+				<xsl:text>Salvation Army</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1081'"> 
-				<xsl:text>Unitarian Universalist</xsl:text> 
+			<xsl:when test="$religion/@code='1081'">
+				<xsl:text>Unitarian Universalist</xsl:text>
 			</xsl:when>
-			<xsl:when test="$religion/@code='1082'"> 
-				<xsl:text>United Church of Christ</xsl:text> 
+			<xsl:when test="$religion/@code='1082'">
+				<xsl:text>United Church of Christ</xsl:text>
 			</xsl:when>
 			<xsl:when test="$religion/@displayName">
-				<xsl:value-of select="$religion/@displayName"/>
+				<xsl:value-of select="$religion/@displayName" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:text>Unknown</xsl:text>
@@ -994,7 +1013,7 @@
 
 	<!-- Set Race Code -->
 	<xsl:template name="getRaceCode">
-		<xsl:param name="raceCode"/>
+		<xsl:param name="raceCode" />
 		<xsl:choose>
 			<xsl:when test="$raceCode/@code='1002-5'">
 				<xsl:text>American Indian or Alaska Native</xsl:text>
@@ -1015,7 +1034,7 @@
 				<xsl:text>White</xsl:text>
 			</xsl:when>
 			<xsl:when test="$raceCode/@displayName">
-				<xsl:value-of select="$raceCode/@displayName"/>
+				<xsl:value-of select="$raceCode/@displayName" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:text>Unknown</xsl:text>
@@ -1025,7 +1044,7 @@
 
 	<!-- Set Ethnic Group -->
 	<xsl:template name="getEthnicGroup">
-		<xsl:param name="ethnicGroup"/>
+		<xsl:param name="ethnicGroup" />
 		<xsl:choose>
 			<xsl:when test="$ethnicGroup/@code='2135-2'">
 				<xsl:text>Hispanic or Latino</xsl:text>
@@ -1034,7 +1053,7 @@
 				<xsl:text>Not Hispanic or Latino</xsl:text>
 			</xsl:when>
 			<xsl:when test="$ethnicGroup/@displayName">
-				<xsl:value-of select="$ethnicGroup/@displayName"/>
+				<xsl:value-of select="$ethnicGroup/@displayName" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:text>Unknown</xsl:text>
@@ -1044,10 +1063,10 @@
 
 	<!-- Set Language -->
 	<xsl:template name="getLang">
-		<xsl:param name="lang"/>
+		<xsl:param name="lang" />
 		<xsl:choose>
 			<xsl:when test="$lang/@displayName">
-				<xsl:value-of select="$lang/@displayName"/>
+				<xsl:value-of select="$lang/@displayName" />
 			</xsl:when>
 			<xsl:when test="$lang/@code='aar'">
 				<xsl:text>Afar</xsl:text>
@@ -1407,7 +1426,7 @@
 				<xsl:text>Norwegian Nynorsk; Nynorsk, Norwegian</xsl:text>
 			</xsl:when>
 			<xsl:when test="$lang/@code='nob'">
-				<xsl:text>Bokmål, Norwegian; Norwegian Bokmål</xsl:text>
+				<xsl:text>Bokmï¿½l, Norwegian; Norwegian Bokmï¿½l</xsl:text>
 			</xsl:when>
 			<xsl:when test="$lang/@code='nor'">
 				<xsl:text>Norwegian</xsl:text>
@@ -1416,7 +1435,7 @@
 				<xsl:text>Chichewa; Chewa; Nyanja</xsl:text>
 			</xsl:when>
 			<xsl:when test="$lang/@code='oci'">
-				<xsl:text>Occitan (post 1500); Provençal</xsl:text>
+				<xsl:text>Occitan (post 1500); Provenï¿½al</xsl:text>
 			</xsl:when>
 			<xsl:when test="$lang/@code='oji'">
 				<xsl:text>Ojibwa</xsl:text>
@@ -1581,7 +1600,7 @@
 				<xsl:text>Vietnamese</xsl:text>
 			</xsl:when>
 			<xsl:when test="$lang/@code='vol'">
-				<xsl:text>Volapük</xsl:text>
+				<xsl:text>Volapï¿½k</xsl:text>
 			</xsl:when>
 			<xsl:when test="$lang/@code='wel'">
 				<xsl:text>Welsh</xsl:text>
@@ -1611,7 +1630,7 @@
 				<xsl:text>English</xsl:text>
 			</xsl:when>
 			<xsl:when test="$lang/@code">
-				<xsl:value-of select="$lang/@code"/>
+				<xsl:value-of select="$lang/@code" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:text>Unknown</xsl:text>
@@ -1629,8 +1648,8 @@
       e.g., 19991207  ==> December 07, 1999
 -->
 	<xsl:template name="formatDate">
-		<xsl:param name="date"/>
-		<xsl:variable name="month" select="substring ($date, 5, 2)"/>
+		<xsl:param name="date" />
+		<xsl:variable name="month" select="substring ($date, 5, 2)" />
 		<xsl:choose>
 			<xsl:when test="$month='01'">
 				<xsl:text>January </xsl:text>
@@ -1671,56 +1690,56 @@
 		</xsl:choose>
 		<xsl:choose>
 			<xsl:when test='substring ($date, 7, 1)="0"'>
-				<xsl:value-of select="substring ($date, 8, 1)"/>
+				<xsl:value-of select="substring ($date, 8, 1)" />
 				<xsl:text>, </xsl:text>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="substring ($date, 7, 2)"/>
+				<xsl:value-of select="substring ($date, 7, 2)" />
 				<xsl:text>, </xsl:text>
 			</xsl:otherwise>
 		</xsl:choose>
-		<xsl:value-of select="substring ($date, 1, 4)"/>
+		<xsl:value-of select="substring ($date, 1, 4)" />
 	</xsl:template>
 
 	<!-- Get a Name -->
 	<xsl:template name="getName">
-		<xsl:param name="name"/>
+		<xsl:param name="name" />
 		<xsl:choose>
 			<xsl:when test="$name/n1:family">
-				<xsl:value-of select="$name/n1:family"/>
+				<xsl:value-of select="$name/n1:family" />
 				<xsl:if test="$name/n1:suffix">
 					<xsl:text> </xsl:text>
-					<xsl:value-of select="$name/n1:suffix"/>
+					<xsl:value-of select="$name/n1:suffix" />
 				</xsl:if>
 				<xsl:if test="$name/n1:prefix|$name/n1:given">
 					<xsl:text>,</xsl:text>
 				</xsl:if>
 				<xsl:if test="$name/n1:prefix">
 					<xsl:text> </xsl:text>
-					<xsl:value-of select="$name/n1:prefix"/>
+					<xsl:value-of select="$name/n1:prefix" />
 				</xsl:if>
 				<xsl:if test="$name/n1:given">
 					<xsl:text> </xsl:text>
-					<xsl:value-of select="$name/n1:given"/>
+					<xsl:value-of select="$name/n1:given" />
 				</xsl:if>
 				<xsl:if test="$name/n1:given[2]">
 					<xsl:text> </xsl:text>
-					<xsl:value-of select="$name/n1:given[2]"/>
+					<xsl:value-of select="$name/n1:given[2]" />
 				</xsl:if>
 				<xsl:if test="$name/n1:given[@qualifier='IN']">
 					<xsl:text> </xsl:text>
-					<xsl:value-of select="$name/n1:given[@qualifier='IN']"/>
+					<xsl:value-of select="$name/n1:given[@qualifier='IN']" />
 				</xsl:if>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="$name"/>
+				<xsl:value-of select="$name" />
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
 	<!-- Get Address -->
 	<xsl:template name="getAddress">
-		<xsl:param name="addr"/>
+		<xsl:param name="addr" />
 		<xsl:choose>
 			<xsl:when test="$addr/n1:streetAddressLine/@nullFlavor">
 				<xsl:text>Unknown</xsl:text>
@@ -1730,32 +1749,32 @@
 			</xsl:when>
 			<xsl:when test="$addr/n1:streetAddressLine">
 				<xsl:for-each select="$addr/n1:streetAddressLine">
-					<xsl:value-of select="current()"/>
-					<xsl:element name="br"/>
+					<xsl:value-of select="current()" />
+					<xsl:element name="br" />
 				</xsl:for-each>
 				<xsl:if test="$addr/n1:city or $addr/n1:state or $addr/n1:postalCode">
 					<xsl:if test="$addr/n1:city !='' ">
-						<xsl:value-of select="$addr/n1:city"/>
+						<xsl:value-of select="$addr/n1:city" />
 						<xsl:text>, </xsl:text>
 					</xsl:if>
 					<xsl:if test="$addr/n1:state">
-						<xsl:value-of select="$addr/n1:state"/>
+						<xsl:value-of select="$addr/n1:state" />
 						<xsl:text>, </xsl:text>
 					</xsl:if>
 					<xsl:if test="$addr/n1:postalCode">
-						<xsl:value-of select="$addr/n1:postalCode"/>
+						<xsl:value-of select="$addr/n1:postalCode" />
 					</xsl:if>
 				</xsl:if>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="$addr"/>
+				<xsl:value-of select="$addr" />
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
 	<!-- Get Previous Address -->
 	<xsl:template name="getPreviousAddress">
-		<xsl:param name="addr"/>
+		<xsl:param name="addr" />
 		<xsl:choose>
 			<xsl:when test="$addr/n1:streetAddressLine/@nullFlavor">
 				<xsl:text>Unknown</xsl:text>
@@ -1765,52 +1784,52 @@
 			</xsl:when>
 			<xsl:when test="$addr/n1:streetAddressLine">
 				<xsl:for-each select="$addr/n1:streetAddressLine">
-					<xsl:value-of select="current()"/>
-					<xsl:element name="br"/>
+					<xsl:value-of select="current()" />
+					<xsl:element name="br" />
 				</xsl:for-each>
 				<xsl:if test="$addr/n1:city or $addr/n1:state or $addr/n1:postalCode">
 					<xsl:if test="$addr/n1:city !='' ">
-						<xsl:value-of select="$addr/n1:city"/>
+						<xsl:value-of select="$addr/n1:city" />
 						<xsl:text>, </xsl:text>
 					</xsl:if>
 					<xsl:if test="$addr/n1:state">
-						<xsl:value-of select="$addr/n1:state"/>
+						<xsl:value-of select="$addr/n1:state" />
 						<xsl:text>, </xsl:text>
 					</xsl:if>
 					<xsl:if test="$addr/n1:postalCode">
-						<xsl:value-of select="$addr/n1:postalCode"/>
+						<xsl:value-of select="$addr/n1:postalCode" />
 					</xsl:if>
 					<xsl:if test="$addr/n1:useablePeriod/n1:low">
-						<xsl:element name="br"/>
+						<xsl:element name="br" />
 						<xsl:text>From: </xsl:text>
 						<xsl:call-template name="formatDate">
-							<xsl:with-param name="date" select="$addr/n1:useablePeriod/n1:low/@value"/>
-						</xsl:call-template>   
+							<xsl:with-param name="date" select="$addr/n1:useablePeriod/n1:low/@value" />
+						</xsl:call-template>
 					</xsl:if>
 					<xsl:if test="$addr/n1:useablePeriod/n1:high">
-						<xsl:element name="br"/>
+						<xsl:element name="br" />
 						<xsl:text>To: </xsl:text>
 						<xsl:call-template name="formatDate">
-							<xsl:with-param name="date" select="$addr/n1:useablePeriod/n1:high/@value"/>
-						</xsl:call-template>   
+							<xsl:with-param name="date" select="$addr/n1:useablePeriod/n1:high/@value" />
+						</xsl:call-template>
 					</xsl:if>
 				</xsl:if>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="$addr"/>
+				<xsl:value-of select="$addr" />
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
 	<!-- Get Telecom -->
 	<xsl:template name="getTelecom">
-		<xsl:param name="telecom"/>
+		<xsl:param name="telecom" />
 		<xsl:choose>
 			<xsl:when test="contains($telecom/attribute::value,':')">
-				<xsl:value-of select="substring-after($telecom/attribute::value,':')"/>
+				<xsl:value-of select="substring-after($telecom/attribute::value,':')" />
 			</xsl:when>
 			<xsl:when test="$telecom/attribute::value">
-				<xsl:value-of select="$telecom/attribute::value"/>
+				<xsl:value-of select="$telecom/attribute::value" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:text>Unavailable</xsl:text>
@@ -1818,77 +1837,77 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<!-- Get Email -->	
+	<!-- Get Email -->
 	<xsl:template name="getEmail">
-		<xsl:param name="email"/>
-		<xsl:variable name="emailaddress" select="substring-after(attribute::value,':')"/>
+		<xsl:param name="email" />
+		<xsl:variable name="emailaddress" select="substring-after(attribute::value,':')" />
 		<xsl:choose>
 			<xsl:when test="$emailaddress = '' ">
 				<xsl:text>Unknown</xsl:text>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="$emailaddress"/>
+				<xsl:value-of select="$emailaddress" />
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
 	<!-- Get Birthplace -->
 	<xsl:template name="getBirthPlace">
-		<xsl:param name="birthplace"/>
+		<xsl:param name="birthplace" />
 		<xsl:choose>
 			<xsl:when test="$birthplace/n1:place/n1:addr/n1:state/@nullFlavor and $birthplace/n1:place/n1:addr/n1:city/@nullFlavor and $birthplace/n1:place/n1:addr/n1:country/@nullFlavor">
 				<xsl:text>Unknown</xsl:text>
 			</xsl:when>
 			<xsl:when test="$birthplace/n1:place/n1:addr">
-				<xsl:if test="$birthplace/n1:place/n1:addr/n1:city">		   
+				<xsl:if test="$birthplace/n1:place/n1:addr/n1:city">
 					<xsl:text>City:</xsl:text>
-					<xsl:value-of select="$birthplace/n1:place/n1:addr/n1:city"/>
-				</xsl:if>   
-				<xsl:if test="$birthplace/n1:place/n1:addr/n1:state"> 
+					<xsl:value-of select="$birthplace/n1:place/n1:addr/n1:city" />
+				</xsl:if>
+				<xsl:if test="$birthplace/n1:place/n1:addr/n1:state">
 					<br/>
 					<xsl:text>State: </xsl:text>
-					<xsl:value-of select="$birthplace/n1:place/n1:addr/n1:state"/>
+					<xsl:value-of select="$birthplace/n1:place/n1:addr/n1:state" />
 				</xsl:if>
-				<xsl:if test="$birthplace/n1:place/n1:addr/n1:country"> 
+				<xsl:if test="$birthplace/n1:place/n1:addr/n1:country">
 					<br/>
 					<xsl:text>Country: </xsl:text>
-					<xsl:value-of select="$birthplace/n1:place/n1:addr/n1:country"/>
+					<xsl:value-of select="$birthplace/n1:place/n1:addr/n1:country" />
 				</xsl:if>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="$birthplace"/>
+				<xsl:value-of select="$birthplace" />
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="mixedCase">
-		<xsl:param name="toconvert"/>
+		<xsl:param name="toconvert" />
 		<xsl:choose>
 			<xsl:when test="contains($toconvert,' ')">
 				<xsl:call-template name="mixedCaseWord">
-					<xsl:with-param name="text" select="substring-before($toconvert,' ')"/>
+					<xsl:with-param name="text" select="substring-before($toconvert,' ')" />
 				</xsl:call-template>
 				<xsl:text> </xsl:text>
 				<xsl:call-template name="mixedCase">
-					<xsl:with-param name="toconvert" select="substring-after($toconvert,' ')"/>
+					<xsl:with-param name="toconvert" select="substring-after($toconvert,' ')" />
 				</xsl:call-template>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:call-template name="mixedCaseWord">
-					<xsl:with-param name="text" select="$toconvert"/>
+					<xsl:with-param name="text" select="$toconvert" />
 				</xsl:call-template>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="mixedCaseWord">
-		<xsl:param name="text"/>
-		<xsl:value-of select="translate(substring($text,1,1),$lowercase,$uppercase)"/>
-		<xsl:value-of select="translate(substring($text,2,string-length($text)-1),$uppercase,$lowercase)"/>
+		<xsl:param name="text" />
+		<xsl:value-of select="translate(substring($text,1,1),$lowercase,$uppercase)" />
+		<xsl:value-of select="translate(substring($text,2,string-length($text)-1),$uppercase,$lowercase)" />
 	</xsl:template>
 
 	<xsl:template match="text()">
-		<xsl:value-of select="normalize-space(.)"/>
+		<xsl:value-of select="normalize-space(.)" />
 	</xsl:template>
 
 </xsl:stylesheet>
